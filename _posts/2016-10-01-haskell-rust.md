@@ -17,11 +17,11 @@ some Haskell problems. If you've ever used Haskell before you know that
 the documentation is either outdated, unrelated to what you actually
 want, or just plain missing. I spent hours digging through old Haskell and
 Rust blog posts, stack overflow posts from 2009, GHC options, and god
-knows how many failures. Rather than having you dig through the depths
-of the archaeological nightmare that is the internet, I've decided to
+knows how many compiler errors. Rather than having you dig through the depths
+of the archaeological nightmare that is the Internet, I've decided to
 write this for anyone trying to use Rust in Haskell. Let me be clear,
-this article is not covering how to use Haskell in Rust. That might be
-for some other time.
+this article is not covering how to use Haskell in Rust. That's for some
+other time.
 
 Let's get started then.
 
@@ -30,9 +30,13 @@ This articles assumes you have the following installed:
 
 - rustc - at least 1.12 stable
 - cargo
-- stack and/or cabal
-- GHC 8.0.1
+- cabal
+- GHC
 - make
+
+Why not stack? It kept yelling at me for weird things. I like it but
+this is a simple example and cabal will suffice. Besides stack is built
+on top of cabal so you should already have it anyways.
 
 ### Setting up our Rust Code
 First let's setup our project directory. Initialize it with the
@@ -158,7 +162,7 @@ and some problems I ran into before actually writing this code.
 
 ### A small digression
 While we could do this in one file we're going to use two of them. One
-containing the foreign functions from Rust and our main file that will
+containing the foreign functions imported from Rust and our main file that will
 call them from the other module. Why? Because there's no documentation
 about using foreign functions imported in one module to be used in
 another and it was the most frustrating things to have to deal with. To
@@ -173,27 +177,93 @@ Haskell's documentation however was messy, disorganized, scattered across
 various web pages and sites, and could use a lot of love in getting fixed up.
 There's no good tutorials on dynamic vs statically linking libraries and how to
 do it. It just said cabal and GHC manuals covered it without linking the relevant
-pages. That's honestly pretty stupid and linking to it would have saved me many
-hours of digging through the documentation. There's no well written explanations
-of doing FFI. The information on how to do it is there, it's just not good or easy to
-parse without time and effort. This is one of the times where no the
-types really can't speak for themselves. It's frustrating because
-I really do like Haskell as a language but the lack of good
-documentation really hurts the language.
+pages. That's honestly pretty frustrating, it felt like saying that's an exercise
+left to the reader with no basic knowledge to get started. Linking to it would have
+saved me many hours of digging through the documentation. There's no well written
+explanations of doing FFI. The information on how to do it is there, it's just
+not good or easy to parse without time and effort. This is one of the times where,
+no the types really can't speak for themselves, because it's not types
+I'm dealing with. It's frustrating because I really do like Haskell as a language
+but the lack of good documentation really hurts the language.
 
 Alright. Enough about bad documentation. Let's actually code what
 I spent forever figuring it out so you don't have to be as frustrated as
-I was.
+I was, and so I can contribute rather than just being angry about it.
 
 ### Setting up our Haskell code
 We're going to create two files in our src directory. Main.hs and FLib.hs. Here's what FLib.hs
 should look like:
 
 ```haskell
-{-# LANGUAGE ForeignFunctionInterface #-}
 module FLib where
 
 import Foreign.C.Types
 
 foreign import ccall "double_input" doubleInput :: CInt -> CInt
+
+-- Put string example her
 ```
+
+Here's what Main.hs looks like:
+
+```haskell
+import FLib
+
+main :: IO ()
+main = do
+  putStrLn $ show $ doubleInput 3 --This will print 6
+
+```
+
+Now we need to setup our cabal file so that this actually can work:
+
+```cabal
+name:                haskellrs
+version:             0.1.0.0
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable haskellrs-exec
+  main-is:             Main.hs
+  hs-source-dirs:      src
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+  other-modules:       FLib
+  extra-libraries:     rusty
+  extra-lib-dirs:      target/release
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     FLib
+  other-extensions:    ForeignFunctionInterface
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+  extra-libraries:     rusty
+  extra-lib-dirs:      target/release
+```
+
+Pretty simple file right? Before we dive into the Haskell code let's get
+this example working so you can see for yourself:
+
+```bash
+cargo build --release
+cabal run
+```
+
+You should see the following printed out on your screen:
+```bash
+6
+```
+
+You just ran Rust code inside of Haskell! Let's dissect our Haskell
+code, so that we can understand how all of this works.
+
+
+
+
+
+
+
+### Conclusion
+If you want to take a look at the code I've put it up in a repository
+[here](https://github.com/mgattozzi/haskellrs).
