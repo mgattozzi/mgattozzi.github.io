@@ -120,7 +120,7 @@ should look like this:
 
 ```rust
 #[no_mangle]
-pub extern "C" fn double_input(x: i32) -> i32 {
+pub extern fn double_input(x: i32) -> i32 {
     2 * x
 }
 ```
@@ -134,7 +134,7 @@ doing any FFI. Not doing so means you won't be able to reference it in
 other languages
 2) Now our actual function header. `pub` makes it available to use
 elsewhere. `extern` means this is externally available outside our
-library. `"C"` tells the compiler to follow the C calling convention when
+library and tells the compiler to follow the C calling convention when
 compiling. If you don't know what that means, it has to do with how code
 leaves values available for functions that called it on the CPU level.
 You can find more information about it
@@ -151,10 +151,40 @@ telling the compiler return the value of the expression, much like how
 the last expression of a `do` block in Haskell returns a value.
 
 Pretty simple right? The only difference between FFI code and Rust only code
-is the `extern "C"` and `#[no_mangle]` statements put into the function
+is the `extern` and `#[no_mangle]` statements put into the function
 header.
 
-DO THE THING WEHRE I SET UP A STRING EXAMPLE
+Okay now let's write a function that prints Strings passed to it. Since
+we're using FFI we need to use `CStrings` so that both languages know how
+to talk to the other. At the top of lib.rs add the following line:
+
+```
+use std::ffi::CString;
+```
+
+Now we're going to write our printing function:
+
+```
+#[no_mangle]
+pub extern fn print_string(x: CString) {
+  if let Ok(input) = x.into_string() {
+    println!("{}", input);
+  } else {
+    panic!("Unable to print input");
+  }
+}
+```
+
+Like before we write out our `#[no_mangle]` and `pub extern` so that the
+function will be exported. We've also stated that our input is
+a `CString`. Because a `CString` isn't like Rust Strings we need to turn it
+into one if we want it to be able to print. This is why we use the
+`into_string()` function. However, this has the possibility of failure. If
+the program making the `CString` fails in making it properly then we won't
+be able to turn it into a Rust String. This is why `into_string()` returns
+a Result Type. If it's translated fine we'll print out the input string
+and if not we panic and cause the program to abort because it failed in
+some manner.
 
 All right so we have our two functions we want to use in Haskell setup.
 I want to talk about what we're going to be doing with the Haskell code
@@ -198,20 +228,28 @@ should look like:
 module FLib where
 
 import Foreign.C.Types
+import Foreign.C.String
 
 foreign import ccall "double_input" doubleInput :: CInt -> CInt
+foreign import ccall unsafe "print_string" printString :: CString -> IO ()
 
--- Put string example her
 ```
 
 Here's what Main.hs looks like:
 
 ```haskell
 import FLib
+import Foreign.C.String (newCString)
 
 main :: IO ()
 main = do
   putStrLn $ show $ doubleInput 3 --This will print 6
+  -- Technically newCString doesn't need the \0 but I found that
+  -- Rust was eating up the last character regardless of what it was
+  -- so to make sure it works I just null terminated it to get the right
+  -- output.
+  str <- newCString "Hello World\0"
+  printString str
 
 ```
 
@@ -229,7 +267,7 @@ executable haskellrs-exec
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
   other-modules:       FLib
-  extra-libraries:     rusty
+  extra-libraries:     rusty, pthread
   extra-lib-dirs:      target/release
 
 library
@@ -238,7 +276,7 @@ library
   other-extensions:    ForeignFunctionInterface
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
-  extra-libraries:     rusty
+  extra-libraries:     rusty, pthread
   extra-lib-dirs:      target/release
 ```
 
@@ -251,19 +289,177 @@ cabal run
 ```
 
 You should see the following printed out on your screen:
+
 ```bash
 6
+Hello World
 ```
 
 You just ran Rust code inside of Haskell! Let's dissect our Haskell
 code, so that we can understand how all of this works.
 
+If we take a look at FLib we have our statements for importing code:
 
+```haskell
+foreign import ccall "double_input" doubleInput :: CInt -> CInt
+foreign import ccall unsafe "print_string" printString :: CString -> IO ()
+```
 
+`foreign import ccall` tells us that the function we're importing
+follows the C calling convention and Haskell should treat it like that
+in it's code. Anything in quotes is the name of the actual function
+we're importing. The stuff after the quotes is the function header and
+what we'll call the name in Haskell. For example our Rust function `double_input`
+is being imported into Haskell as `doubleInput` and it takes a `CInt` and
+returns a `CInt`.
 
+Take a look at the second line though. Notice how I put unsafe? We need
+this because of how `CStrings` work for one in Haskell (I couldn't get
+anything to print if I didn't put unsafe) but two we are doing an IO
+action. Unlike `doubleInput` this function isn't pure and we have side
+effects (printing out a line) and so we need this to be in the IO monad
+for it to work. Even if your input might be a `CInt` for another function
+you write, if you implement any kind of IO with that function import it
+with an unsafe call so that it's enforced that way in Haskell. Unlike
+Rust, Haskell needs to keep track of it's IO actions so that it knows
+how to execute things each time.
 
+General rule of thumb:
 
+- Import pure functions as if they were safe
+- Import impure functions as unsafe
+
+Okay now let's look at our Main.hs file
+
+```haskell
+import FLib
+import Foreign.C.String (newCString)
+
+main :: IO ()
+main = do
+  putStrLn $ show $ doubleInput 3
+  str <- newCString "Hello World\0"
+  printString str
+
+```
+
+This is the code that actually executes our Rust Functions. First we
+import our library that contains our Rust code and we import a function
+to make `CStrings`.
+
+Now we setup our main function. If you've not used Haskell before then
+the syntax might look different but we'll go through each line so you
+can understand what's going on:
+
+```haskell
+main :: IO ()
+```
+
+This is our function declaration. Every executable has a main function
+with a return type of of `IO ()`. Essentially we're saying this program
+has side effects (because we are running a program on a computer) and it
+returns the unit type `()` upon completion wrapped up in the IO monad.
+If that was complete gibberish then just know that IO is there to tell
+the compiler we're doing stuff that affects the computer and it needs to
+properly keep track of it.
+
+```haskell
+main = do
+  putStrLn $ show $ doubleInput 3
+```
+
+We've started our `do` block which is saying that all the actions after
+this must be in a monad and the last statement returns the value of the
+expected monad, in this case we're in the `IO` monad and the last
+statement must return `IO ()`. Our next line contains `$`. It's a way of
+saying do everything to the right of me first. That line is equivalent
+to writing:
+
+```haskell
+(putStrLn (show (doubleInput 3)))
+```
+
+I just find that the `$` is a bit cleaner to read. So what's happening
+here is we're doubling the input 3. However we want to display this in
+the terminal, so `show` converts the `CInt` into a `String` and
+`putStrLn` actually prints it out to the console!
+
+Next up we have this line:
+
+```haskell
+str <- newCString "Hello World\0"
+```
+
+What we're saying is store the value of `newCString` into `str`. Why are we
+doing this though? Couldn't we just do what we did with the other line?
+Well no, see `newCString` returns an `IO CString` and what we want is
+the value inside the `IO` which is a type `CString`. Our function
+`printString` expects a `CString` not an `IO CString`. By doing this
+step we can actually then use `str` as a `CString`!
+
+That's why this line works:
+
+```haskell
+  printString str
+```
+
+It then prints our string and returns an `IO ()` like the do block
+expects and so our code compiles! I've been hiding some of the magic of
+how this works in the cabal file that contains some options and things
+to get this working. Let's take a look at it again:
+
+```cabal
+name:                haskellrs
+version:             0.1.0.0
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable haskellrs-exec
+  main-is:             Main.hs
+  hs-source-dirs:      src
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+  other-modules:       FLib
+  extra-libraries:     rusty, pthread
+  extra-lib-dirs:      target/release
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     FLib
+  other-extensions:    ForeignFunctionInterface
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+  extra-libraries:     rusty, pthread
+  extra-lib-dirs:      target/release
+```
+
+It's fairly straight forward. We've created an executable that imports
+our FLib library (this is why it's listed under other-modules) and it
+imports our rust library (remember we called it rusty). We've also stated
+where rusty was located with the extra-lib-dirs that way Haskell could
+link it in properly. Remember this means you've compiled the Rust
+Library first otherwise the target/release folder won't exist at all. Now
+we've also imported this library pthread. It was necessary to get the `CString`
+example working. Our library entry is also pretty much the same but take
+a look under other-extensions. It uses `ForeignFunctionInterface`. If we
+didn't put this here we would have to put `{-# LANGUAGE
+ForeignFunctionInterface #-}` at the top of every Haskell file that did
+an import call. By putting it here it implicitly does that for every
+file in the library. Together these allow Haskell to call our Rust code
+as expected. Seems like a lot but overall there aren't that many lines
+of code needed to get it working!
 
 ### Conclusion
 If you want to take a look at the code I've put it up in a repository
-[here](https://github.com/mgattozzi/haskellrs).
+[here](https://github.com/mgattozzi/haskellrs). This post covered how to
+setup a project to use Rust inside of Haskell code. While this was
+fairly simple to setup and do in terms of the overall code it still took
+some work. It also covered the proper ways to call the code inside of
+Rust. I've started a package to automate the process in
+Rust and Haskell projects so the need to write all the boiler plate
+yourself is unnecessary. It'll also provide mappings between the various
+types in Rust and Haskell to make it easier to reason about. This will
+take some time to get right but making this a seamless experience for
+users would be great. I think Rust and Haskell compliment
+each other well and making it easy to do that will be a boon to both
+communities.
