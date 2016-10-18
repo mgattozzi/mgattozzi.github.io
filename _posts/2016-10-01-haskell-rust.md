@@ -169,7 +169,7 @@ Now we're going to write our printing function:
 pub extern fn print_string(x: *const c_char) {
   unsafe {
     let cstring = CStr::from_ptr(x);
-    if let Ok(input) = x.to_str() {
+    if let Ok(input) = cstring.to_str() {
       println!("{}", input);
     } else {
       panic!("Unable to print input");

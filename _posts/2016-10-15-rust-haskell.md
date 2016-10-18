@@ -22,7 +22,6 @@ This articles assumes you have the following installed:
 - cargo
 - stack
 - GHC 8.0.1
-- gcc
 - make
 
 ### Setting up the project
@@ -160,7 +159,7 @@ Also look at the flags used:
 
 - `-dynamic` tells GHC that we want a dynamic library
 - `-fPIC` is also necessary because of the need for Position Independent Code
-- `-lHSrst-ghc8.0.1` is telling GHC to link in the rst library which we
+- `-lHSrts-ghc8.0.1` is telling GHC to link in the rts library which we
   need for our code to work in other places. It's tied to the version of
   the compiler you use. Just change the last few numbers to the version
   you're using for this to work. However, at the time of writing
@@ -206,16 +205,17 @@ void fin(void) {
 Now run the following:
 
 ```bash
-gcc -shared -o libinter.so inter.c libhs.so -fPIC
+ghc -shared -o libinter.so inter.c libhs.so -fPIC
 ```
 
 This creates a shared library `inter.so` that we can use that's linked with
-`libhs.so` using Position Independent Code. Now you'll get warnings
-about implicit declarations. Don't worry about them. Remember in
-`wrapper.c` how we imported HsFFI? Well it's located in `libhs.so` and
-it contains the functions `hs_init` and `hs_exit` that we want to use!
-`inter.c` is just used as a wrapper to make starting and stopping the
-Haskell runtime in Rust easier to do. Alright now let's write some Rust!
+`libhs.so` using Position Independent Code. We compile it using ghc as a C
+compiler so that it can locate all the haskell runtime libraries. Now you'll get
+warnings about implicit declarations. Don't worry about them. Remember in
+`wrapper.c` how we imported HsFFI? Well it's located in `libhs.so` and it
+contains the functions `hs_init` and `hs_exit` that we want to use! `inter.c` is
+just used as a wrapper to make starting and stopping the Haskell runtime in Rust
+easier to do. Alright now let's write some Rust!
 
 ### Rust
 First up open up Cargo.toml and change it to have a build file and to
@@ -295,7 +295,7 @@ to avoid this problem:
 build: hs cargo
 
 hs:
-	@(cd hs2rs && stack build && gcc -shared -o libinter.so inter.c libhs.so -fPIC -Wno-implicit)
+	@(cd hs2rs && stack build && ghc -shared -o libinter.so inter.c libhs.so -fPIC -Wno-implicit)
 
 cargo:
 	@cargo build
