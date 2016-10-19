@@ -342,3 +342,6 @@ or vice versa and allowing Haskell to have a type safe fast language
 when speed truly is critical.
 
 If you're interested on bridging that gap as well let me know!
+
+Thanks to [Caleb Jones](https://github.com/porglezomp) for making some
+corrections to this article.

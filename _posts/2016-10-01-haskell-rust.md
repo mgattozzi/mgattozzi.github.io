@@ -469,3 +469,6 @@ take some time to get right but making this a seamless experience for
 users would be great. I think Rust and Haskell compliment
 each other well and making it easy to do that will be a boon to both
 communities.
+
+Thanks to [Caleb Jones](https://github.com/porglezomp) for making some minor
+corrections to this article.
