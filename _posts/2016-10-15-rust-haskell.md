@@ -190,6 +190,8 @@ to act as our intermediary for Rust and Haskell. Open up a file in this
 directory called `inter.c` and place the following in it:
 
 ```c
+#include <HsFFI.h>
+
 void init(void) {
   static char *argv[] = { "libhs.so", 0 }, **argv_ = argv;
   static int argc = 1;
@@ -210,12 +212,9 @@ ghc -shared -o libinter.so inter.c libhs.so -fPIC
 
 This creates a shared library `inter.so` that we can use that's linked with
 `libhs.so` using Position Independent Code. We compile it using ghc as a C
-compiler so that it can locate all the haskell runtime libraries. Now you'll get
-warnings about implicit declarations. Don't worry about them. Remember in
-`wrapper.c` how we imported HsFFI? Well it's located in `libhs.so` and it
-contains the functions `hs_init` and `hs_exit` that we want to use! `inter.c` is
-just used as a wrapper to make starting and stopping the Haskell runtime in Rust
-easier to do. Alright now let's write some Rust!
+compiler so that it can locate all the haskell runtime libraries. `inter.c` is
+just used as a wrapper around `hs_init` and `hs_exit` to make it easier to start
+and stop the Haskell runtime in Rust. Alright now let's write some Rust!
 
 ### Rust
 First up open up Cargo.toml and change it to have a build file and to
@@ -295,7 +294,7 @@ to avoid this problem:
 build: hs cargo
 
 hs:
-	@(cd hs2rs && stack build && ghc -shared -o libinter.so inter.c libhs.so -fPIC -Wno-implicit)
+	@(cd hs2rs && stack build && ghc -shared -o libinter.so inter.c libhs.so -fPIC)
 
 cargo:
 	@cargo build
