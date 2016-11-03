@@ -22,6 +22,7 @@ This articles assumes you have the following installed:
 - cargo
 - stack
 - GHC 8.0.1
+- gcc
 - make
 
 ### Setting up the project
@@ -207,11 +208,11 @@ void fin(void) {
 Now run the following:
 
 ```bash
-ghc -shared -o libinter.so inter.c libhs.so -fPIC
+gcc -shared -o libinter.so inter.c libhs.so -fPIC
 ```
 
 This creates a shared library `inter.so` that we can use that's linked with
-`libhs.so` using Position Independent Code. We compile it using ghc as a C
+`libhs.so` using Position Independent Code. We compile it using gcc as a C
 compiler so that it can locate all the haskell runtime libraries. `inter.c` is
 just used as a wrapper around `hs_init` and `hs_exit` to make it easier to start
 and stop the Haskell runtime in Rust. Alright now let's write some Rust!
@@ -294,7 +295,7 @@ to avoid this problem:
 build: hs cargo
 
 hs:
-	@(cd hs2rs && stack build && ghc -shared -o libinter.so inter.c libhs.so -fPIC)
+	@(cd hs2rs && stack build && gcc -shared -o libinter.so inter.c libhs.so -fPIC)
 
 cargo:
 	@cargo build
