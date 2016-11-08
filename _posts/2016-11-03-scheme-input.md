@@ -15,7 +15,7 @@ about all the language in the specification. It's just verbose so we
 know *exactly* how to define it in our implementation. The main thing is
 that we learn some Rust and have some fun doing it!
 
-##A little history on Scheme
+## A little history on Scheme
 Scheme is a derivative of LISP or LISt Processor (jokingly referred to as
 'Lots of Irritating Stupid Parentheses' as you will soon come to realize).
 LISP was one of the first programming languages created by an MIT professor
@@ -28,13 +28,14 @@ we go through each tutorial. [Here](https://mitpress.mit.edu/sicp/) is a great
 place to start learning it. It's the text I've been using in class and provides
 great examples to learn from as well as exercises you can use to learn it.
 
-##What we're covering
+## What we're covering
 We won't be writing any Scheme in this tutorial. All we're going to do
 is get the beginning of a REPL (Read Eval Print Loop) setup for us to
 use. It'll keep taking input from us and printing out what we typed in
 and loop until we put in `(exit)` as input.
 
 Here are the Rust topics we'll cover:
+
 - Setting up a Rust Environment using Rustup
 - Compiling your first program
 - Cargo.toml files
@@ -50,7 +51,7 @@ We'll cover topics in Rust as we need them. By the end of this tutorial
 you should have a basic Read Print Loop that we can exit from. With that
 in mind let's setup our project.
 
-##Let's get setup
+## Let's get setup
 Rust has two main tools to actually build your code, `rustc` which is
 the Rust compiler and `cargo` it's package manager and build system.
 We'll need both installed if we want to get anything done. We'll need
@@ -89,6 +90,7 @@ Just follow the on screen instructions. At the very least you'll want
 the stable channel installed and to be your default.
 
 Run the following commands to make sure
+
 ```bash
 rustc --version
 cargo --version
@@ -101,13 +103,14 @@ compiler and `cargo` are there and that we can use the tools. At the
 time of this writing `rustc` is on version 1.12.1 but any stable version
 after it should work as well. If it's not the stable version then type
 the following:
+
 ```bash
 rustup default stable
 ```
 
 Then check that it's the stable version. Cool we've got all of our tools now!
 
-##Initialize the project
+## Initialize the project
 Now that we have our tools installed let's start using them. First thing
 we're going to do is create a project for a binary. We're going to call
 our project `schemers` in this tutorial but you can name your project
@@ -152,7 +155,7 @@ lives and where `cargo` checks for files to compile so it can invoke `rustc` to
 actually make the binary. `main.rs` is the entry point for any binary
 in Rust and `lib.rs` is the entry point for any library.
 
-##I fought immutability and immutability won
+## I fought immutability and immutability won
 The code is actually setup to do the classic "Hello world!" already.
 Just use `cargo run` in the terminal and it'll compile and print it out. Let's face it
 though. It's an old and boring example. Let's actually learn
@@ -253,7 +256,7 @@ again you'll see that it compiled and ran. Our program doesn't actually
 do anything right now. It's quite useless. Let's change that by getting
 ourselves some input from users to print out!
 
-##Depend on dependable dependencies
+## Depend on dependable dependencies
 We need a way to get input from users, but we also want them to move
 the cursor around, and later on we might want to save that history so
 they can go back and use an old command again. We could write our own
@@ -448,9 +451,9 @@ a variable added as an argument. To make that clear:
 ```rust
 let a = "Hello";
 let b = "world";
-println!("{} {}!, a ,b);
+println!("{} {}!", a ,b);
 // This prints out "Hello world!"
-println!("{} {}!, b ,a);
+println!("{} {}!", b ,a);
 // This prints out "world Hello!"
 ```
 
@@ -525,8 +528,9 @@ that's how you'll learn. If you run into difficulty ask on the
 \#rust-beginners irc channel for help! The community is great and loves
 to help new users.
 
-##Exercises
+## Exercises
 Here's what I want you to do:
+
 - Modify the `Err` line so that the program exits gracefully on an EOF
   or Interrupted, but prints an error out like before otherwise.
   (Hint: You'll need to modify `done` here and check for the error
@@ -541,7 +545,7 @@ Here's what I want you to do:
   in the interpreter so that "    (exit)", "(exit)    ", and "(exit)"
   all cause the program to exit.
 
-##Conclusion
+## Conclusion
 We've covered a lot, like getting Rust all setup, setting up a project,
 a little bit of Rust syntax, mutability, and how to get dependencies
 into your project. This is but a sample of what we can do with Rust. We
