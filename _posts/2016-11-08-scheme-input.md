@@ -40,7 +40,6 @@ Here are the Rust topics we'll cover:
 - Compiling your first program
 - Cargo.toml files
 - External imports
-- Rust `match` statements
 - Rust `while` loops
 - Rust `if else` statements
 - Rust `match` statements
