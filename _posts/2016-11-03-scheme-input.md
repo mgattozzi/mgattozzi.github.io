@@ -357,6 +357,7 @@ fn main() {
 ```
 
 We covered this before but let's reiterate the point:
+
 - We're importing a crate `rustyline` for use in this file
 - We've declared a `main` function so that when we execute the binary we
   know where to start our program's execution
@@ -367,7 +368,7 @@ let mut reader = rustyline::Editor::<()>::new();
 ```
 
 We've seen that first line before, we've created a boolean variable
-called `done` that can change it's value. We've also set it to false.
+called `done` that can change it's value. We've also set it to `false`.
 What's that next line though? Well we've declared a variable `reader` that
 is mutable. Okay, that makes sense, what's all the stuff on the right?
 Well Rust borrows this syntax style from C++. What we're telling the
