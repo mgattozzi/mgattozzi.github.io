@@ -568,7 +568,7 @@ syntax errors (at least in terms of `()` not lining up properly). If you
 have comments or questions feel free to ping me on Twitter or open up
 issues on the repository itself where all of this code is hosted! You
 can find all of the code from this article in the [schemers
-repo here](https://github.com/mgattozzi/schemers/tree/input).
+repo here](https://github.com/mgattozzi/schemers/tree/Input).
 
 \* It should be noted prior to writing this article I had no idea that
 schemers was the name of the website. This project is not associated
