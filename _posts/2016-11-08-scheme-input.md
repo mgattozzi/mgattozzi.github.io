@@ -337,7 +337,7 @@ fn main() {
                 if line == "(exit)" {
                     done = true;
                 } else {
-                    println!("{}",line)
+                    println!("{}",line);
                 },
             Err(e) => println!("Couldn't readline. Error was: {}", e),
         }
@@ -410,7 +410,7 @@ Ok(line) =>
     if line == "(exit)" {
         done = true;
     } else {
-        println!("{}",line)
+        println!("{}",line);
     },
 Err(e) => println!("Couldn't readline. Error was: {}", e),
 ```
@@ -477,7 +477,7 @@ Ok(line) =>
     if line == "(exit)" {
         done = true;
     } else {
-        println!("{}",line)
+        println!("{}",line);
     },
 ```
 
