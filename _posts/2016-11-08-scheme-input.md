@@ -565,9 +565,10 @@ turn our input into something that we can later evaluate as Scheme code.
 We'll also be checking to make sure that the code doesn't have any
 syntax errors (at least in terms of `()` not lining up properly). If you
 have comments or questions feel free to ping me on Twitter or open up
-issues on the repository itself where all of this code is hosted! You
-can find all of the code from this article in the [schemers
-repo here](https://github.com/mgattozzi/schemers/tree/Input).
+issues on the repository itself where all of this code is hosted!
+
+You can find all of the code from this article in the schemers repo [here](https://github.com/mgattozzi/schemers/tree/Input).
+The next article can be found [here](https://mgattozzi.github.io/2016/11/09/scheme-ex1.html).
 
 \* It should be noted prior to writing this article I had no idea that
 schemers was the name of the website. This project is not associated
