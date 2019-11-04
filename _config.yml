@@ -1,32 +1,4 @@
-# Welcome to Amplified for Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely need to edit after that.
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'jekyll serve'. If you change this file, please restart the server process.
-
-# Site settings
-title: Barely Functional
-email: mgattozzi@gmail.com
-description: >
-  Thoughts and musings from a functional programmer who drinks way too much coffee.
-logo: "mgattozzi.github.io/assets/images/logo.png"
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://mgattozzi.github.io" # the base hostname & protocol for your site
-paginate:	5 # The number of posts to show per page on your homepage
-
-name: 'Michael Gattozzi'
-bio: >
-  I get paid to make lights change patterns on a screen and I can't imagine doing anything else. Lover of all things vim, functional, and unix. Avid gamer with a penchant to buy more games than I have time for.
-author_image: "mgattozzi.github.io/assets/images/author.jpg"
-twitter_username: mgattozzi
-github_username:  mgattozzi
-
-# Build settings
 markdown: kramdown
 
 kramdown:
   parse_block_html: true
-
-gems:
-  - jekyll-paginate

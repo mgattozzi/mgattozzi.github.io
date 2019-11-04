@@ -1,455 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Barely Functional</title>
-    <description>Thoughts and musings from a functional programmer who drinks way too much coffee.
-</description>
-    <link>https://mgattozzi.github.io/</link>
-    <atom:link href="https://mgattozzi.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 27 May 2016 18:48:38 -0400</pubDate>
-    <lastBuildDate>Fri, 27 May 2016 18:48:38 -0400</lastBuildDate>
-    <generator>Jekyll v3.1.3</generator>
+    <title></title>
+    <description></description>
+    <link>/</link>
+    <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Mon, 04 Nov 2019 16:35:54 -0500</pubDate>
+    <lastBuildDate>Mon, 04 Nov 2019 16:35:54 -0500</lastBuildDate>
+    <generator>Jekyll v4.0.0</generator>
     
       <item>
-        <title>How do I convert a &amp;str to a String in Rust?</title>
-        <description>&lt;p&gt;This is the first in a whole series of blog posts to answer the simple
-question “How do I X in Rust?” Many times as a user coming into the
-Rust language there are growing pains and some things that seem
-intuitive after using the language for a while aren’t for a new user.
-This is aimed at those new users, however even an experienced Rust user
-might learn a new trick or two.&lt;/p&gt;
-
-&lt;p&gt;With that in mind let’s jump right in!&lt;/p&gt;
-
-&lt;h2 id=&quot;whats-the-difference-between-str-and-string&quot;&gt;What’s the difference between &amp;amp;str and String?&lt;/h2&gt;
-
-&lt;p&gt;Before we talk about conversion it’ll help to know what
-a &lt;a href=&quot;https://doc.rust-lang.org/std/primitive.str.html&quot;&gt;&amp;amp;str&lt;/a&gt; and
-a &lt;a href=&quot;https://doc.rust-lang.org/std/string/struct.String.html&quot;&gt;String&lt;/a&gt; are and why we’d want to convert from a &amp;amp;str to a String.
-A &amp;amp;str is an immutable reference to a String. This means you can’t change
-the string at all or manipulate it in any way. However if you have
-a String you have the option to do that as well as having some methods
-that &amp;amp;str doesn’t have to do text manipulation. You can look at the
-methods available to the different data types that are linked above for
-what you can do exactly with each type. Generally speaking:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;You want &amp;amp;str if you don’t want to change the string&lt;/li&gt;
-  &lt;li&gt;You want String if you want to change the string or need ownership of
-the data&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Sometimes you’ll get a &amp;amp;str type from a method, but need a String. The
-following methods we’ll discuss will show you how to convert to a String
-from an &amp;amp;str.
-&lt;em&gt;Thanks to &lt;a href=&quot;https://twitter.com/LeoUnglaub/status/735942665569767424&quot;&gt;@LeoUnglaub&lt;/a&gt; for suggesting to add this section&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;converting-a-str-to-a-string&quot;&gt;Converting a &amp;amp;str to a String&lt;/h2&gt;
-
-&lt;p&gt;Surprisingly, there are quite a few ways to do this and depending on what
-you’re trying to do one of the methods laid out below will be more
-appropriate.&lt;/p&gt;
-
-&lt;h3 id=&quot;tostring&quot;&gt;to_string()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello World!&quot;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;to_string() turns an &amp;amp;str into a String. Back before &lt;a href=&quot;https://github.com/rust-lang/rust/pull/32586&quot;&gt;this pr in version
-1.9&lt;/a&gt; of the compiler this
-was actually slower than the next method I’ll be showing you. It went
-through crazy amounts of machinery to turn it into a String whereas the
-newer compiler version optimized this for &amp;amp;str -&amp;gt; String making it
-equivalent to the next method speed wise. This machinery is all the code
-that can parse the data type and turn it into a String. It should be
-noted that this and the following methods are copying data under the
-hood so that you can have ownership of the String. There is no speed
-difference between to_string(), to_owned(), and String::from().&lt;/p&gt;
-
-&lt;p&gt;There was a question on the subreddit as to whether this means .to_owned() would be deprecated. &lt;a href=&quot;https://www.reddit.com/r/rust/comments/4l71qw/how_do_i_convert_a_str_to_string_the_beginning_in/d3mc6jy?context=3&quot;&gt;/u/Roaneno answers it well here.&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;toowned&quot;&gt;to_owned()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello World!&quot;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_owned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;Since the &amp;amp;str is an immutable reference to a String using to_owned()
-turns it into a String you own and can do things with! This is now the
-same as to_string(), but was the preferred way prior to 1.9 .to_owned()
-is used for other data types to promote an immutable reference into a
-data type you own.&lt;/p&gt;
-
-&lt;h3 id=&quot;stringfrom&quot;&gt;String::from()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello World!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;When you are using to_string() in any compiler after 1.9 you’re actually
-using this method. to_string() ends up being syntactic sugar for it.
-You hand an &amp;amp;str into the from method and from there it constructs
-a String type for you to use.&lt;/p&gt;
-
-&lt;h3 id=&quot;stringpushstr&quot;&gt;String::push_str()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//Create an empty string&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; World!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//Prints Hello World!&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;Since a String is a growable data type you can add to it by pushing &amp;amp;str
-into it. While this is a bit verbose for the example I gave above you
-could use it to concatenate a variety of &amp;amp;str into one String that you
-can then manipulate to do other things.&lt;/p&gt;
-
-&lt;h3 id=&quot;format&quot;&gt;format!()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;world_var&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;world&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;//Becomes &quot;Hello World!&quot;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;format!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello {}!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;world&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;You can also use the format!() macro in order to do some more complex
-formatting with &amp;amp;str as input. It’s like println!() but instead of
-outputting to stdout it instead returns a String. This is simpler to use
-than .push_str() if you know what text you want in your string and don’t
-want lines of code just to set it up. Given the above example with
-.push_str() it would be:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;world_var&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;world&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;world_var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;This is way more verbose than is needed. That’s why a case like this is
-more suited to format!() to have the code be more expressive and clean
-looking. However, there is a cost. Remember that crazy machinery I was
-talking about for .to_string()? That was using this under the hood and
-as such was less efficient. Use this method with caution if speed is
-a concern.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Tip courtesy of &lt;a href=&quot;https://www.reddit.com/r/rust/comments/4l71qw/how_do_i_convert_a_str_to_string_the_beginning_in/d3kxqhk&quot;&gt;/u/MrJillHace&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;into&quot;&gt;into()&lt;/h3&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello world!&quot;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.into&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;This is a less well known way to do it, but since &amp;amp;str implements
-Into it has this method available to it. Think of it as saying I’m
-turning this into that. It’s a trait for conversions which you can find
-&lt;a href=&quot;&quot;&gt;here in the docs&lt;/a&gt; if you want to read more about it. While it’s a
-little less clear as to what it’s doing you have this method available
-to you as well. It’s not guaranteed to be fast according to the
-definition of the trait, just that you are guaranteed the conversion
-itself. String::from() implements the From trait which implements Into.
-You’re probably better off using that method rather than this, but
-you’re more than free to do so.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Tip courtesy of
-&lt;a href=&quot;https://twitter.com/nj_snav_lin/status/735923508467924997?s=09&quot;&gt;@nj_snav_lin&lt;/a&gt; and &lt;a href=&quot;https://www.reddit.com/r/rust/comments/4l71qw/how_do_i_convert_a_str_to_string_the_beginning_in/d3lgmdi&quot;&gt;/u/cramert&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;whats-the-idiomatic-rust-way&quot;&gt;What’s the idiomatic Rust way?&lt;/h2&gt;
-
-&lt;p&gt;Most code you’ll see will use .to_owned() or String::from() since that
-was faster than .to_string(). Now though any of those 3 will be the most
-common way to do conversions. This is one of those things that has so
-many ways to do things that there’s no one standard for the community.
-I personally think .to_string() or String::from() are good choices since
-they emphasize what they’re doing more so than .to_owned() or any of the
-other methods. Others might disagree, but at the end of the day it’s
-your code so choose the method that’s best suited for what you’re doing.&lt;/p&gt;
-
-&lt;h2 id=&quot;we-have-to-go-back-marty&quot;&gt;We have to go back Marty!&lt;/h2&gt;
-
-&lt;p&gt;Sometimes you’ll need to go back from a String to &amp;amp;str. All you’ll have
-to do is:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello World!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_immutable_string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//This is a &amp;amp;String type&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//This is an &amp;amp;str type&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&amp;amp;String can be used anywhere there is a need for &amp;amp;str. It automatically
-turns into it if the method calls for it.&lt;/p&gt;
-
-&lt;p&gt;Simple enough right? If you want to know why you can read about &lt;a href=&quot;https://doc.rust-lang.org/book/deref-coercions.html&quot;&gt;auto deref here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Thanks to &lt;a href=&quot;https://twitter.com/k0pernicus/status/736154776166109185&quot;&gt;@k0pernicus&lt;/a&gt; for suggesting to add this to the post&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Above are the various ways you can make a String from a &amp;amp;str and each
-serves a different purpose:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;.to_string() if you want a simple conversion and show you’re making
-a String&lt;/li&gt;
-  &lt;li&gt;.to_owned() if you want a simple conversion and to show you’re taking
-ownership of it.&lt;/li&gt;
-  &lt;li&gt;String::from() a more explicit way to say what you’re doing&lt;/li&gt;
-  &lt;li&gt;String::push_str() if you need to append to a String&lt;/li&gt;
-  &lt;li&gt;format!() if you have predefined text that you wanted formatted in
-a specific way and don’t care about the speed cost&lt;/li&gt;
-  &lt;li&gt;.into() if you want a simple conversion and don’t care about the
-ambiguity of it&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You can also easily go from a String to a &amp;amp;str:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&amp;amp;String types turn into &amp;amp;str if the method call needs it&lt;/li&gt;
-  &lt;li&gt;let my_str: &amp;amp;str = &amp;amp;my_string; if you want to explicitly specify
-a &amp;amp;str type&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you have a burning question that you want answered but just can’t
-seem to find the answer you need, shoot me an email at
-mgattozzi@gmail.com and I’ll write a post to answer your question! No
-question is stupid. Chances are if you’re having trouble with it so is
-someone else so ask away!&lt;/p&gt;
-
-&lt;p&gt;If you’re a more experienced Rust user and want to help with the wording
-or give suggestions send me a PR or reach out to me and I’ll include
-changes if they’re good. You’ll also get credit for your
-contributions of course!&lt;/p&gt;
+        <title>Scheme Ex1</title>
+        <description>
+</description>
+        <pubDate>Wed, 09 Nov 2016 00:00:00 -0500</pubDate>
+        <link>/2016/11/09/scheme-ex1.html</link>
+        <guid isPermaLink="true">/2016/11/09/scheme-ex1.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Scheme Input</title>
+        <description>
+</description>
+        <pubDate>Tue, 08 Nov 2016 00:00:00 -0500</pubDate>
+        <link>/2016/11/08/scheme-input.html</link>
+        <guid isPermaLink="true">/2016/11/08/scheme-input.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Rust Haskell</title>
+        <description>
+</description>
+        <pubDate>Sat, 15 Oct 2016 00:00:00 -0400</pubDate>
+        <link>/2016/10/15/rust-haskell.html</link>
+        <guid isPermaLink="true">/2016/10/15/rust-haskell.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Haskell Rust</title>
+        <description>
+</description>
+        <pubDate>Sat, 01 Oct 2016 00:00:00 -0400</pubDate>
+        <link>/2016/10/01/haskell-rust.html</link>
+        <guid isPermaLink="true">/2016/10/01/haskell-rust.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Blog About Rust</title>
+        <description>
+</description>
+        <pubDate>Tue, 27 Sep 2016 00:00:00 -0400</pubDate>
+        <link>/2016/09/27/blog-about-rust.html</link>
+        <guid isPermaLink="true">/2016/09/27/blog-about-rust.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Understanding Where Clauses</title>
+        <description>
+</description>
+        <pubDate>Tue, 13 Sep 2016 00:00:00 -0400</pubDate>
+        <link>/2016/09/13/understanding-where-clauses.html</link>
+        <guid isPermaLink="true">/2016/09/13/understanding-where-clauses.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>1 Year Of Rust</title>
+        <description>
+</description>
+        <pubDate>Tue, 30 Aug 2016 00:00:00 -0400</pubDate>
+        <link>/2016/08/30/1-year-of-rust.html</link>
+        <guid isPermaLink="true">/2016/08/30/1-year-of-rust.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>How Do I Std Macros</title>
+        <description>
+</description>
+        <pubDate>Wed, 01 Jun 2016 00:00:00 -0400</pubDate>
+        <link>/2016/06/01/how-do-i-std-macros.html</link>
+        <guid isPermaLink="true">/2016/06/01/how-do-i-std-macros.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>How Do I Str String</title>
+        <description>
 </description>
         <pubDate>Thu, 26 May 2016 00:00:00 -0400</pubDate>
-        <link>https://mgattozzi.github.io/2016/05/26/how-do-i-str-string.html</link>
-        <guid isPermaLink="true">https://mgattozzi.github.io/2016/05/26/how-do-i-str-string.html</guid>
+        <link>/2016/05/26/how-do-i-str-string.html</link>
+        <guid isPermaLink="true">/2016/05/26/how-do-i-str-string.html</guid>
         
         
       </item>
     
       <item>
         <title>Announcing Alchemist</title>
-        <description>&lt;p&gt;I’ve been working on a small project for a while now and it’s with great
-pleasure that I get to announce it now that I have a proof of concept.
-This is Alchemist a program designed to transform package names for
-other distributions into the equivalent package names in your own
-distribution. It then will install them for you automatically.&lt;/p&gt;
-
-&lt;p&gt;I was tired of Arch Linux being treated as a second class citizen in
-many Github projects where instructions only existed for Ubuntu
-installation. This was a shame and raises a barrier to entry to getting
-users set up to use the project. Why not create a tool that removes this
-barrier that I consistently came against? Why not create it so that it
-worked for all unix based platforms? I can’t be the only one facing this
-problem and lesser known or used distributions must have it worse than
-I when it comes to this.&lt;/p&gt;
-
-&lt;p&gt;I began work on Alchemist in order to solve this problem, put package
-names in and get the correct version for my platform out. Right now
-I only have a few packages that map from Ubuntu to Arch (or vice versa)
-and the db schema only works for Arch and Ubuntu right now. I want to
-change this though and expand the functionality to other platforms and
-add more packages for users to have. This is a huge undertaking and not
-one I can do alone. Any help is appreciated no matter how small. Even
-if it’s just adding package mappings or adding support for more distros
-all code changes are welcome.&lt;/p&gt;
-
-&lt;p&gt;Of course I can’t just claim all of this and not give a demonstration.
-Here’s a video of me installing some packages for Ubuntu and getting
-the Arch Linux equivalent:&lt;/p&gt;
-
-&lt;iframe src=&quot;https://player.vimeo.com/video/165509394&quot; width=&quot;640&quot; height=&quot;357&quot; frameborder=&quot;0&quot; webkitallowfullscreen=&quot;&quot; mozallowfullscreen=&quot;&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
-
-&lt;p&gt;In order to build it you’ll need the binary and library packages for
-postgresql and sqlite of your distro so that diesel will build and
-the latest version of the nightly compiler due to the nature of
-diesel as a library.&lt;/p&gt;
-
-&lt;p&gt;I hope that this will solve a problem for some that has bugged me for
-quite some time and I’m looking forward to seeing what Alchemist will
-become in the future.&lt;/p&gt;
-
-&lt;p&gt;You can find the code located on Github
-&lt;a href=&quot;https://github.com/mgattozzi/Alchemist&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+        <description>
 </description>
         <pubDate>Thu, 05 May 2016 00:00:00 -0400</pubDate>
-        <link>https://mgattozzi.github.io/2016/05/05/announcing-alchemist.html</link>
-        <guid isPermaLink="true">https://mgattozzi.github.io/2016/05/05/announcing-alchemist.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>Schrodinger&#39;s Bug Adventures in Asynchronous Debugging</title>
-        <description>&lt;p&gt;Lately I’ve been writing integration tests for &lt;a href=&quot;https://elsen.co&quot;&gt;Elsen&lt;/a&gt;
-using node.js to verify our Haskell backend is indeed returning to us
-what we expect to be there. Using a combination of the Mocha, Chai, and
-Supertest frameworks I’ve managed to make a comprehensive set of tests.
-It’s a simple process: Mocha runs the tests and outputs if everything
-passed or not, Supertest makes the actual requests to our API, and Chai
-verifies the JSON we get back is what we would expect. One of our tests
-would look like this:&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//This is our context that certain endpoints are wrapped in&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Functions&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//This is the more specific context and where we start usin endpoints&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Syntax Checking&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;/v2/syntaxcheck&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syntax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syntax_res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;//This is one of the tests. It makes the request with API&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Syntax is valid&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;syntax&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;function succ(x) { return (x+1); }&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;API&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Authorization&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;LOGIN_TOKEN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;syntax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Content-Type&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;application/json; charset=utf-8&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-          &lt;span class=&quot;c1&quot;&gt;//Here we make the actual comparisons&lt;/span&gt;
-          &lt;span class=&quot;c1&quot;&gt;//Done is used for all the calls because they&#39;re asynchronous&lt;/span&gt;
-          &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;nx&quot;&gt;syntax_res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;nx&quot;&gt;syntax_res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;should&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;equal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;//This is like above but we have an error here that I spent about&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//two days debugging. Look at the previous one and see if you&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//can figure it out at all.&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Syntax is invalid&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;syntax&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;function succ(x) { return (x+ }&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;API&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Authorization&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;LOGIN_TOKEN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;syntax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Content-Type&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;application/json; charset=utf-8&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-          &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;nx&quot;&gt;syntax_res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;nx&quot;&gt;syntax_res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;should&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;eql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-              &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Parse error at line 1, col 31&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;position&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-            &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-          &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;Note that these are only a small section of the thousands of lines of
-code written to test the API. One error here though made me frustrated
-to no end. If you ran these tests as they’re written above then they
-both pass without issue.&lt;/p&gt;
-
-&lt;p&gt;I discovered the issue when I was adding some more tests. I tested
-whether or not the JSON I got back even it existed. The test said it
-did. Then I tried to console.log() the result. Nothing was printed out.
-I tested if it didn’t exist as well. That test also passed. How can the
-JSON I’m getting back both exist and not exist simultaneously? This
-made absolutely no sense! Much like Schrodingers famous thought
-experiment I had something that existed and didn’t until I tried to
-observe it.&lt;/p&gt;
-
-&lt;p&gt;Now what? The test I was doing was a POST as well much like my syntax
-checker endpoint. I also had some more that did a POST. I changed each
-of them to make them wrong and fail. I verified the correct results
-using curl to hit the endpoints manually. I ran the tests again. All
-the ones I changed failed except the syntax checker. This was where I
-started to go crazy. How come it worked for some of them but not all of
-them? I added a console.log() to the syntax checker as well just to see
-if I got anything unlike the first time. That’s when I really started
-to lose my mind. I got a result back this time. What I didn’t realize
-then though was that the result should have printed out where my test
-executed not later on in the middle of another test.&lt;/p&gt;
-
-&lt;p&gt;Visually it looked like this:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#Syntax Test executes here
-Pass
-#More Tests
-Pass
-#More Tests
-Pass
-#Syntax Test Result Outputs here
-{ JSON }
-
-#It should have been like this:
-#Syntax Test executes here
-Pass
-#Syntax Test Result Outputs here
-{ JSON }
-#More Tests
-Pass
-#More Tests
-Pass
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;I spent many hours checking documentation and checking to see if it was
-a bug in versions of the testing frameworks. Long story short none of
-that helped in the slightest. I was chasing a red herring. That’s when
-I commented everything out but the login test (in order to authenticate
-our connections) and the syntax check test. This test still had the
-console.log() statement. Guess what? Nothing printed this time! This
-was the second day I was working on this test and still nothing. My
-boss Zac came in at this point to help me out and we spent a while
-trying to figure it out. We lloked at the docs again and other working
-bits of my code. That’s when we figured it out. The fact one word was
-not used caused the tests to pass.&lt;/p&gt;
-
-&lt;p&gt;I had forgoten one word in the whole process that would cause it all to
-work as intended: done.&lt;/p&gt;
-
-&lt;p&gt;Remember this line of code?&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;it(&#39;Syntax is invalid&#39;, function() {
-  //Other stuff is in here
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;The anonymous function is missing the word done as a parameter. The
-tests normally use it in those .end() calls I make to tell the test to
-wait for whatever is in there to complete because it’s asynchronus.
-However without that done statement the .end() function wasn’t even
-being entered into causing the tests to pass otherwise. When a result
-was logged later it was because it had finally been processed. When it
-wasn’t, that was because the test framework had already completed
-running all of it’s tests and so didn’t bother to print the results!&lt;/p&gt;
-
-&lt;p&gt;Needless to say I was relieved to finally have the tests working as
-expected. I learned quite a bit about debugging asynchronous code,
-something I’ve never really touched upon. I’ve normally dealt with
-either synchronous code or just sequential execution making this an eye
-opening experience. The main take away is that if you are doing
-asynchronous code make sure that you have your callback defined if you
-want it to wait for the result!&lt;/p&gt;
-</description>
-        <pubDate>Sun, 20 Mar 2016 00:00:00 -0400</pubDate>
-        <link>https://mgattozzi.github.io/2016/03/20/schrodingers-bug.html</link>
-        <guid isPermaLink="true">https://mgattozzi.github.io/2016/03/20/schrodingers-bug.html</guid>
+        <link>/2016/05/05/announcing-alchemist.html</link>
+        <guid isPermaLink="true">/2016/05/05/announcing-alchemist.html</guid>
         
         
       </item>

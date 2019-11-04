@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<html ⚡ lang="en">
-  {% include head.html %}
-  <body>
-    {% include header.html %}
-
-    {{ content }}
-  </body>
-</html>
+<meta charset="utf-8">
+<title>Redirecting to {{page.link}}</title>
+<meta http-equiv="refresh" content="0; URL={{page.link}}">
+<link rel="canonical" href="{{page.link}}">
